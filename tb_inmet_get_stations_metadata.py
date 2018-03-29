@@ -49,13 +49,13 @@ for line in f:
 
 f.close()
 f = open('stations.csv','w')
-f.write('stationName,stationCode,latitude,longitude,altitude,launchDate,url\n')
+f.write('stationName;stationCode;latitude;longitude;altitude;launchDate;url\n')
 for m in metalist:
-	f.write(m['stationName'] + ',' +
-			m['stationCode'] + ',' +
-			m['latitude'] + ',' +
-			m['longitude'] + ',' +
-			m['altitude'] + ',' +
-			m['launchDate'] + ',' +
+	f.write(m['stationName'] + ';' +
+			m['stationCode'] + ';' +
+			m['latitude'] + ';' +
+			m['longitude'] + ';' +
+			m['altitude'] + ';' +
+			m['launchDate'] + ';' +
 			m['url'] + '\n')
 f.close()

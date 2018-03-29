@@ -37,7 +37,7 @@ def load_csv(fname, header_row=0, first_data_row=None, types=None, **kwargs):
     import csv
 
     try:
-        reader = csv.reader(open(fname), **kwargs)
+        reader = csv.reader(open(fname), delimiter=';', **kwargs)
     except IOError:
         print('Unable to load "%s".  Check that it exists.' % fname)
         return
