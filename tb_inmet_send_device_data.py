@@ -2,12 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from datetime import datetime
-import time
 import calendar
 import swagger_client
 from swagger_client.rest import ApiException
-from pprint import pprint
 import ast
 import os
 import glob
@@ -16,11 +13,12 @@ import json
 import sys
 from tb_inmet_utils import get_api_configuration
 from tb_inmet_utils import renew_token
+import collections
 
 # data files root folder
 root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
 # get API configuration object
-configuration = get_api_configuration(hostname='192.168.25.105:8080')
+configuration = get_api_configuration(hostname='', username='', password='')
 
 # create an instance of the API class
 device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))
@@ -41,12 +39,10 @@ for folder in os.listdir(root_path):
         single_str = single_str.replace('\t', '')
         data = single_str.split('<br>')
         data = data[:-1]
-        # first iterates just to discover station code
-        reader = csv.reader(data)
-        keys = reader.next()
-        values = reader.next()
-        current_data = dict(zip(keys, values))
-        station_code = current_data['codigo_estacao']
+        # get station code
+        station_code = filename.split('.')[0].split('-')[-1]
+        if (station_code != 'A239'):
+            continue
         # 1 - get device id from station code
         current_device_id = ""
         while True:
@@ -81,27 +77,61 @@ for folder in os.listdir(root_path):
         reader = csv.reader(data)
         keys = reader.next()
         # iterate over data collects, -1 to exclude first row of keys
-        for i in range(len(data)-1):
-            values = reader.next()
-            current_data = dict(zip(keys, values))
+        for row_of_values in reader:
+            current_data = dict(zip(keys, row_of_values))
             # convert current datetime to timestamp
             date = current_data['data'].split('/')
             time_tuple_utc = (int(date[2]), int(date[1]), int(date[0]), int(current_data['hora']), 0, 0)
-            ts_utc  = calendar.timegm(time_tuple_utc)
+            ts_utc  = int(calendar.timegm(time_tuple_utc)) * 1000
+            # adjust data types
+            if(current_data['hora'] != '////'):
+                current_data['hora'] = int(current_data['hora'])
+            if (current_data['radiacao'] != '////'):
+                current_data['radiacao'] = float(current_data['radiacao'])
+            if (current_data['precipitacao'] != '////'):
+                current_data['precipitacao'] = float(current_data['precipitacao'])
+            if (current_data['vento_direcao'] != '////'):
+                current_data['vento_direcao'] = float(current_data['vento_direcao'])
+            if (current_data['vento_rajada'] != '////'):
+                current_data['vento_rajada'] = float(current_data['vento_rajada'])
+            if (current_data['vento_vel'] != '////'):
+                current_data['vento_vel'] = int(current_data['vento_vel'])
+            if (current_data['temp_max'] != '////'):
+                current_data['temp_max'] = float(current_data['temp_max'])
+            if (current_data['temp_min'] != '////'):
+                current_data['temp_min'] = float(current_data['temp_min'])
+            if (current_data['temp_inst'] != '////'):
+                current_data['temp_inst'] = float(current_data['temp_inst'])
+            if (current_data['umid_max'] != '////'):
+                current_data['umid_max'] = int(current_data['umid_max'])
+            if (current_data['umid_min'] != '////'):
+                current_data['umid_min'] = int(current_data['umid_min'])
+            if (current_data['umid_inst'] != '////'):
+                current_data['umid_inst'] = int(current_data['umid_inst'])
+            if (current_data['pressao_max'] != '////'):
+                current_data['pressao_max'] = float(current_data['pressao_max'])
+            if (current_data['pressao_min'] != '////'):
+                current_data['pressao_min'] = float(current_data['pressao_min'])
+            if (current_data['pressao'] != '////'):
+                current_data['pressao'] = float(current_data['pressao'])
+            if (current_data['pto_orvalho_max'] != '////'):
+                current_data['pto_orvalho_max'] = float(current_data['pto_orvalho_max'])
+            if (current_data['pto_orvalho_min'] != '////'):
+                current_data['pto_orvalho_min'] = float(current_data['pto_orvalho_min'])
+            if (current_data['pto_orvalho_inst'] != '////'):
+                current_data['pto_orvalho_inst'] = float(current_data['pto_orvalho_inst'])
             # write data to thingsboard
             # 1 - format json
             json_data = {}
-            json_data['ts'] = ts_utc
             json_data['values'] = current_data
-            json_str = json.dumps(json_data, ensure_ascii=False)
-            a = sys.getsizeof(json_str)
-            json_data = ast.literal_eval(json_str)
+            json_data['ts'] = ts_utc
             # 2 - write data
             while True:
                 try:
                     # post telemetry data
                     api_response = device_api_controller_api_inst.post_telemetry_using_post(current_device_token, json_data)
                     #pprint(api_response)
+                    print('wrote data for station %s' % current_data['codigo_estacao'])
                 except ApiException as e:
                     if (json.loads(e.body)['message'] == 'Token has expired'):
                         renew_token(configuration)
@@ -109,3 +139,4 @@ for folder in os.listdir(root_path):
                     else:
                         print("Exception when calling DeviceApiControllerApi->post_telemetry_using_post: %s\n" % e)
                 break
+file.close()

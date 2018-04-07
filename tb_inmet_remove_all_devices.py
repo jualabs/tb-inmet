@@ -2,41 +2,32 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import time
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-from tb_inmet_utils import load_csv
 from tb_inmet_utils import get_api_configuration
 from tb_inmet_utils import renew_token
-import ast
+import csv
+import json
 
 # read data related to stations metadata
-data = load_csv("stations.csv", header_row=0)
-#print("The keys are: %s" % data.keys())
-#print(data)
+csv_file = open("stations.csv", 'r')
 # get API configuration object
-configuration = get_api_configuration(hostname='192.168.25.105:8080')
+configuration = get_api_configuration(hostname='', username='', password='')
 
 # create an instance of the API class
 device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))
 
-# device_name = 'CruzeirodoSul-A108'
-# try: 
-#     # saveDevice
-#     api_response = device_controller_api_inst.get_tenant_device_using_get(device_name)
-#     pprint(api_response)
-#     current_device_id = api_response.id.id
-# except ApiException as e:
-#     print("Exception when calling DeviceControllerApi->save_device_using_post: %s\n" % e)
-         
-# loop through all station in metadata file
-for i in range(0, len(data['stationName'])):
-    # print(data['stationName'][i]+'-'+data['stationCode'][i])
+reader = csv.reader(csv_file, delimiter=';')
+keys = reader.next()
+# iterate over all csv data
+for row_of_values in reader:
+    current_data = dict(zip(keys, row_of_values))
     # create a device for the current station
     current_device_id = ""
-    device_name = data['stationCode'][i]
-
+    device_name = current_data['stationCode']
+    if(device_name == 'A052'):
+        print('debug')
     while True:
         try:
             # saveDevice
@@ -62,3 +53,4 @@ for i in range(0, len(data['stationName'])):
             else:
                 print("Exception when calling DeviceControllerApi->delete_device_using_delete: %s\n" % e)
         break
+csv_file.close()

@@ -2,18 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from datetime import datetime
-import time
 import calendar
-import swagger_client
-from swagger_client.rest import ApiException
-from pprint import pprint
-import ast
 import os
 import glob
 import csv
 import json
-import sys
 
 # data files root folder
 root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
