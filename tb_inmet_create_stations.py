@@ -14,7 +14,7 @@ import json
 csv_file = open("stations.csv", 'r')
 
 # get API configuration object
-configuration = get_api_configuration(hostname='', username='', password='')
+configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
 
 # create an instance of the API class
 device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))
