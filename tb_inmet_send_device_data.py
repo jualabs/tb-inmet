@@ -13,6 +13,7 @@ import json
 import sys
 from tb_inmet_utils import get_api_configuration
 from tb_inmet_utils import renew_token
+from tqdm import tqdm
 import collections
 
 # data files root folder
@@ -30,6 +31,7 @@ for folder in os.listdir(root_path):
     current_folder_path = root_path + folder
     # iterates over all '.html' files in one folder
     for filename in glob.glob(os.path.join(current_folder_path, '*.html')):
+        print('processing file: %s\n' % filename.split('/')[-1])
         file = open(filename, 'r')
         single_str = ''
         for line in file:

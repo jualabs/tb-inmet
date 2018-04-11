@@ -32,14 +32,15 @@ for row_of_values in reader:
         try:
             # saveDevice
             api_response = device_controller_api_inst.get_tenant_device_using_get(device_name)
-            pprint(api_response)
+            #pprint(api_response)
             current_device_id = api_response.id.id
         except ApiException as e:
             if (json.loads(e.body)['message'] == 'Token has expired'):
                 renew_token(configuration)
                 continue
             else:
-                print("Exception when calling DeviceControllerApi->save_device_using_post: %s\n" % e)
+                continue
+                #print("Exception when calling DeviceControllerApi->save_device_using_post: %s\n" % e)
         break
     # delete the current device credentials
     while True:
@@ -51,6 +52,7 @@ for row_of_values in reader:
                 renew_token(configuration)
                 continue
             else:
-                print("Exception when calling DeviceControllerApi->delete_device_using_delete: %s\n" % e)
+                continue
+                #print("Exception when calling DeviceControllerApi->delete_device_using_delete: %s\n" % e)
         break
 csv_file.close()
