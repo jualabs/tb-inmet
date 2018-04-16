@@ -17,8 +17,10 @@ from tqdm import tqdm
 import collections
 
 # data files root folder
-root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
+#root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
+root_path = '/home/tb-inmet/inmet/inmet/inmet/data/'
 # get API configuration object
+# configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
 configuration = get_api_configuration(hostname='127.0.0.1:8080', username='victorwcm@gmail.com', password='')
 
 # create an instance of the API class
@@ -38,8 +40,8 @@ def send_data_from_file(file_path):
     # get station code
     station_code = file_path.split('.')[0].split('-')[-1]
     # init DEBUG
-    #if (station_code != 'A239'):
-    #    return
+    if (station_code != 'A239'):
+        return
     # end DEBUG
     # 1 - get device id from station code
     current_device_id = ""
@@ -88,19 +90,24 @@ def send_data_from_file(file_path):
                 try:
                     json_temp[key] = int(current_data[key])
                 except ValueError:
+                    json_temp['invalid_sensors'] = (key + ',');
                     current_data[key] = '-';
                     tqdm.write('value not provided in file: %s at hour %s' % (file_path, current_data['hora']))
                     continue
             elif (key == 'radiacao' or key == 'precipitacao' or key == 'vento_direcao' or key == 'vento_rajada' or
                   key == 'temp_max' or key == 'temp_min' or key == 'temp_inst' or
                   key == 'pressao_max' or key == 'pressao_min' or key == 'pressao' or
-                  key == 'pto_orovalho_max' or key == 'pto_orvalho_min' or key == 'pto_orvalho_inst'):
+                  key == 'pto_orvalho_max' or key == 'pto_orvalho_min' or key == 'pto_orvalho_inst'):
                 try:
                     json_temp[key] = float(current_data[key])
                 except ValueError:
+                    json_temp['invalid_sensors'] = (key + ',');
                     current_data[key] = '-';
                     tqdm.write('value not provided in file: %s at hour %s' % (file_path, current_data['hora']))
                     continue
+        # clean last caracter from json invalid sensors key
+        if json_temp['invalid_sensors'] != '':
+            json_temp['invalid_sensors'] = json_temp['invalid_sensors'][-1]
         # write data to thingsboard
         # 1 - format json
         json_data = {}
@@ -125,7 +132,8 @@ def walkdir(folder):
     # walk through each files in a directory
     for dirpath, dirs, files in os.walk(folder):
         for filename in files:
-            yield os.path.abspath(os.path.join(dirpath, filename))
+            if filename.endswith(".html"):
+                yield os.path.abspath(os.path.join(dirpath, filename))
 
 # function that iterates over all folders
 def iterate_over_all_files(root_path):
