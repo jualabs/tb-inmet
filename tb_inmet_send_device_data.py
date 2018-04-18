@@ -17,10 +17,10 @@ from tqdm import tqdm
 import collections
 
 # data files root folder
-#root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
-root_path = '/home/tb-inmet/inmet/inmet/inmet/data/'
+root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
+#root_path = '/home/tb-inmet/inmet/inmet/inmet/data/'
 # get API configuration object
-# configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
+#configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
 configuration = get_api_configuration(hostname='127.0.0.1:8080', username='victorwcm@gmail.com', password='')
 
 # create an instance of the API class
@@ -83,7 +83,7 @@ def send_data_from_file(file_path):
         date = current_data['data'].split('/')
         time_tuple_utc = (int(date[2]), int(date[1]), int(date[0]), int(current_data['hora']), 0, 0)
         ts_utc = int(calendar.timegm(time_tuple_utc)) * 1000
-        json_temp = {}
+        json_temp = {'invalid_sensors':''}
         # adjust data types
         for key, value in current_data.iteritems():
             if (key == 'hora' or key == 'vento_vel' or key == 'umid_max' or key == 'umid_min' or key == 'umid_inst'):
