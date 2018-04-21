@@ -15,13 +15,22 @@ from tb_inmet_utils import get_api_configuration
 from tb_inmet_utils import renew_token
 from tqdm import tqdm
 import collections
+import sys
 
 # data files root folder
-root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
+#root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
 #root_path = '/home/tb-inmet/inmet/inmet/inmet/data/'
+if len(sys.argv) == 2:
+    root_path = sys.argv[1]
+    if root_path[-1] != '/':
+        root_path = root_path + '/'
+else:
+    tqdm.write("Usage: python tb_inmet_send_device_data <root-folder-path>")
+    exit()
+
 # get API configuration object
 #configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
-configuration = get_api_configuration(hostname='127.0.0.1:8080', username='victorwcm@gmail.com', password='')
+configuration = get_api_configuration(hostname='localhost:8080', username='victorwcm@gmail.com', password='')
 
 # create an instance of the API class
 device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))
@@ -40,8 +49,8 @@ def send_data_from_file(file_path):
     # get station code
     station_code = file_path.split('.')[0].split('-')[-1]
     # init DEBUG
-    if (station_code != 'A239'):
-        return
+    #if (station_code != 'A239'):
+    #    return
     # end DEBUG
     # 1 - get device id from station code
     current_device_id = ""
@@ -128,12 +137,14 @@ def send_data_from_file(file_path):
             break
     file.close()
 
+
 def walkdir(folder):
     # walk through each files in a directory
     for dirpath, dirs, files in os.walk(folder):
         for filename in files:
             if filename.endswith(".html"):
                 yield os.path.abspath(os.path.join(dirpath, filename))
+
 
 # function that iterates over all folders
 def iterate_over_all_files(root_path):

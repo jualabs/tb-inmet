@@ -14,7 +14,8 @@ import json
 csv_file = open("stations.csv", 'r')
 
 # get API configuration object
-configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
+#configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
+configuration = get_api_configuration(hostname='localhost:8080', username='victorwcm@gmail.com', password='')
 
 # create an instance of the API class
 device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))
@@ -27,7 +28,7 @@ for row_of_values in reader:
     current_data = dict(zip(keys, row_of_values))
     # create a device for the current station
     device_name = current_data['stationCode']
-    if(device_name != 'A239'):
+    if(device_name == 'A239'):
         continue
     device = swagger_client.Device(name=device_name, type='automatic-station')
     while True:
