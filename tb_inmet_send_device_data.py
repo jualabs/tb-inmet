@@ -12,6 +12,17 @@ from tb_inmet_utils import get_api_tokens_from_password
 from tb_inmet_utils import renew_token
 from tqdm import tqdm
 import yaml
+import sys
+
+
+# set root path for input data files
+if len(sys.argv) == 2:
+    root_path = sys.argv[1]
+    if root_path[-1] != '/':
+        root_path = root_path + '/'
+else:
+    tqdm.write("Usage: python tb_inmet_send_device_data <root-folder-path>")
+    exit()
 
 # get configurations from YAML config file
 with open("config.yaml", 'r') as yamlfile:
@@ -23,10 +34,7 @@ configuration = swagger_client.Configuration()
 configuration.host = cfg['tb_api_access']['host']
 configuration.username = cfg['tb_api_access']['user']
 configuration.password = cfg['tb_api_access']['passwd']
-# set root path for input data files
-root_path = cfg['tb_input_data']['root_folder']
-if root_path[-1] != '/':
-    root_path = root_path + '/'
+
 # get tokens
 tokens = get_api_tokens_from_password(configuration.host, configuration.username, configuration.password)
 # configure API key authorization: X-Authorization
