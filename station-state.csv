@@ -1,0 +1,577 @@
+C891,AA,Projeto Criosfera 
+A108,AC,Cruzeiro do Sul 
+A140,AC,Epitaciolândia 
+A138,AC,Feijó 
+A137,AC,Marechal Thaumaturgo 
+A102,AC,Parque Estadual Chandless 
+A136,AC,Porto Walter 
+A104,AC,Rio Branco 
+A353,AL,Arapiraca 
+A355,AL,Coruripe 
+A303,AL,Maceió 
+A327,AL,Palmeira dos Índios 
+A323,AL,Pão de Açucar 
+A371,AL,Piranhas 
+A356,AL,São Luis do Quitunde 
+A113,AM,Apui 
+A120,AM,Autazes 
+A128,AM,Barcelos 
+A110,AM,Boca do Acre 
+A117,AM,Coari 
+A109,AM,Eirunepé 
+A112,AM,Humaitá 
+A121,AM,Itacoatiara 
+A111,AM,Lábrea 
+A119,AM,Manacapuru 
+A101,AM,Manaus 
+A133,AM,Manicore 
+A122,AM,Maués 
+A123,AM,Parintins 
+A126,AM,Presidente Figueiredo 
+A125,AM,Rio Urubu 
+A134,AM,São Gabriel da Cachoeira 
+A124,AM,Urucará 
+A251,AP,Itaubal 
+A249,AP,Macapá 
+A242,AP,Oiapoque 
+A243,AP,Tartarugalzinho 
+A422,BA,Abrolhos 
+A434,BA,Amargosa 
+A429,BA,Barra 
+A402,BA,Barreiras 
+A447,BA,Belmonte 
+A418,BA,Bom Jesus da Lapa 
+A433,BA,Brumado 
+A432,BA,Buritirama 
+A405,BA,Caravelas 
+A431,BA,Conde 
+A416,BA,Correntina 
+A406,BA,Cruz das Almas 
+A448,BA,Curaçá 
+A443,BA,Delfino 
+A442,BA,Euclides da Cunha 
+A413,BA,Feira de Santana 
+A452,BA,Formosa do Rio Preto 
+A426,BA,Guanambi 
+A439,BA,Ibotirama 
+A410,BA,Ilhéus 
+A445,BA,Ipiaú 
+A424,BA,Irecê 
+A408,BA,Itaberaba 
+A455,BA,Itamaraju 
+A446,BA,Itapetinga 
+A407,BA,Itiruçu 
+A440,BA,Jacobina 
+A450,BA,Jeremoabo 
+A425,BA,Lençóis 
+A404,BA,Luis Eduardo Magalhaes 
+A412,BA,Macajuba 
+A454,BA,Macaúbas 
+A438,BA,Maraú 
+A430,BA,Piatã 
+A449,BA,Pilão Arcado 
+A427,BA,Porto Seguro 
+A436,BA,Queimadas 
+A423,BA,Remanso 
+A401,BA,Salvador 
+A456,BA,Salvador-Est. Rádio Marinha 
+A415,BA,Santa Rita de Cássia 
+A428,BA,Senhor do Bonfim 
+A441,BA,Serrinha 
+A435,BA,Uauá 
+A437,BA,Una 
+A444,BA,Valença 
+A414,BA,Vitória da Conquista 
+A360,CE,Acaraú 
+A315,CE,Barbalha 
+A347,CE,Campos Sales 
+A342,CE,Crateús 
+A305,CE,Fortaleza 
+A314,CE,Guaramiranga 
+A319,CE,Iguatu 
+A359,CE,Itapipoca 
+A358,CE,Jaguaribe 
+A339,CE,Jaguaruana 
+A332,CE,Morada Nova 
+A369,CE,Quixadá 
+A325,CE,Quixeramobim 
+A306,CE,Sobral 
+A324,CE,Tauá 
+A368,CE,Tianguá 
+A045,DF,Águas Emendadas 
+A001,DF,Brasília 
+A042,DF,Brazlândia 
+A047,DF,Paranoá (COOPA) 
+A657,ES,Afonso Cláudio 
+A617,ES,Alegre 
+A615,ES,Alfredo Chaves 
+A631,ES,Ecoporanga 
+A614,ES,Linhares 
+A632,ES,Marilândia 
+A623,ES,Nova Venécia 
+A622,ES,Presidente Kennedy 
+A613,ES,Santa Teresa 
+A616,ES,São Mateus 
+A633,ES,Venda Nova do Imigrante 
+A634,ES,Vila Velha 
+A612,ES,Vitória 
+A024,GO,Alto Paraíso de Goiás 
+A013,GO,Aragarças 
+A023,GO,Caiapônia 
+A034,GO,Catalão 
+A036,GO,Cristalina 
+A056,GO,Cristalina-Fazenda Santa Monica 
+A029,GO,Edéia 
+A046,GO,Gama (Ponte Alta) 
+A022,GO,Goianésia 
+A002,GO,Goiânia 
+A014,GO,Goiás 
+A028,GO,Iporá 
+A015,GO,Itapaci 
+A035,GO,Itumbiara 
+A016,GO,Jataí 
+A012,GO,Luziânia 
+A026,GO,Mineiros 
+A032,GO,Monte Alegre de Goiás 
+A003,GO,Morrinhos 
+A004,GO,Niquelândia 
+A027,GO,Paraúna 
+A033,GO,Pires do Rio 
+A017,GO,Posse 
+A025,GO,Rio Verde 
+A031,GO,São Miguel do Araguaia 
+A011,GO,São Simão 
+A037,GO,Silvânia 
+A223,MA,Alto Parnaíba 
+A220,MA,Bacabal 
+A204,MA,Balsas 
+A221,MA,Barra do Corda 
+A238,MA,Buriticupu 
+A205,MA,Carolina 
+A206,MA,Chapadinha 
+A222,MA,Colinas 
+A224,MA,Estreito 
+A218,MA,Farol Preguiças 
+A217,MA,Farol Santana 
+A207,MA,Grajaú 
+A225,MA,Imperatriz 
+A203,MA,São Luís 
+A219,MA,Turiaçu 
+A549,MG,Águas Vermelhas 
+A534,MG,Aimorés 
+A508,MG,Almenara 
+A566,MG,Araçuaí 
+A505,MG,Araxá 
+A565,MG,Bambuí 
+A502,MG,Barbacena 
+F501,MG,Belo Horizonte,Cercadinho 
+A521,MG,Belo Horizonte,Pampulha 
+A544,MG,Buritis 
+A530,MG,Caldas 
+A519,MG,Campina Verde 
+A541,MG,Capelinha 
+A554,MG,Caratinga 
+A548,MG,Chapada Gaúcha 
+A520,MG,Conceição das Alagoas 
+A557,MG,Coronel Pacheco 
+A538,MG,Curvelo 
+A537,MG,Diamantina 
+A564,MG,Divinópolis 
+A536,MG,Dores do Indaiá 
+A543,MG,Espinosa 
+A535,MG,Florestal 
+A524,MG,Formiga 
+A532,MG,Governador Valadares 
+A533,MG,Guanhães 
+A546,MG,Guarda-Mor 
+A555,MG,Ibirité (Rola Moça) 
+A550,MG,Itaobim 
+A512,MG,Ituiutaba 
+A563,MG,Janaúba 
+A559,MG,Januária 
+A553,MG,João Pinheiro 
+A518,MG,Juiz de Fora 
+A567,MG,Machado 
+A556,MG,Manhuaçu 
+A540,MG,Mantena 
+A531,MG,Maria da Fé 
+A539,MG,Mocambinho 
+A526,MG,Montalvânia 
+A506,MG,Montes Claros 
+A509,MG,Monte Verde 
+A517,MG,Muriaé 
+A570,MG,Oliveira 
+A513,MG,Ouro Branco 
+A571,MG,Paracatu 
+A529,MG,Passa Quatro 
+A516,MG,Passos 
+A562,MG,Patos de Minas 
+A523,MG,Patrocíonio 
+A545,MG,Pirapora 
+A560,MG,Pompéu 
+A551,MG,Rio Pardo de Minas 
+A525,MG,Sacramento 
+A552,MG,Salinas 
+A514,MG,São João del Rei 
+A547,MG,São Romão 
+A561,MG,São Sebastião do Paraíso 
+A522,MG,Serra dos Aimorés 
+A569,MG,Sete Lagoas 
+A527,MG,Teófilo Otoni 
+A511,MG,Timóteo 
+A528,MG,Três Marias 
+A568,MG,Uberaba 
+A507,MG,Uberlândia 
+A542,MG,Unaí 
+A515,MG,Varginha 
+A510,MG,Viçosa 
+A756,MS,Água Clara 
+A750,MS,Amambaí 
+S701,MS,Angélica 
+A719,MS,Aquidauana 
+S702,MS,Aral Moreira 
+S703,MS,Bandeirantes 
+A759,MS,Bataguassu 
+A757,MS,Bela Vista 
+S705,MS,Brasilândia 
+S706,MS,Caarapó 
+S707,MS,Camapuã 
+A702,MS,Campo Grande 
+A742,MS,Cassilândia 
+A730,MS,Chapadão do Sul 
+A724,MS,Corumbá 
+A760,MS,Costa Rica 
+A720,MS,Coxim 
+A721,MS,Dourados 
+S708,MS,Fátima do Sul 
+S709,MS,Iguatemi 
+S710,MS,Itaporã 
+A752,MS,Itaquiraí 
+A709,MS,Ivinhema 
+A758,MS,Jardim 
+A749,MS,Juti 
+S711,MS,Laguna Carapã 
+A731,MS,Maracaju 
+A722,MS,Miranda 
+A717,MS,Nhumirim 
+S712,MS,Nova Alvorada do Sul 
+A710,MS,Paranaíba 
+S714,MS,Pedro Gomes 
+A703,MS,Ponta Porã 
+A723,MS,Porto Murtinho 
+S715,MS,Ribas do Rio Pardo 
+A743,MS,Rio Brilhante 
+S716,MS,Santa Rita do Rio Pardo 
+A732,MS,São Gabriel do Oeste 
+S717,MS,Selviria 
+A751,MS,Sete Quedas 
+A754,MS,Sidrolândia 
+A761,MS,Sonora 
+A704,MS,Três Lagoas 
+A908,MT,Água Boa 
+A924,MT,Alta Floresta 
+A909,MT,Alto Araguaia 
+A934,MT,Alto Taquari 
+A910,MT,Apiacás 
+A941,MT,Cáceres 
+A905,MT,Campo Novo dos Parecis 
+A912,MT,Campo Verde 
+A926,MT,Carlinda 
+A913,MT,Comodoro 
+A919,MT,Cotriguaçu 
+A901,MT,Cuiabá 
+A930,MT,Gaucha do Norte 
+A906,MT,Guarantã do Norte 
+A932,MT,Guiratinga 
+A933,MT,Itiquira 
+A914,MT,Juara 
+A920,MT,Juína 
+A928,MT,Nova Maringá 
+A929,MT,Nova Ubiratã 
+A927,MT,Novo Mundo 
+A915,MT,Paranatinga 
+A937,MT,Pontes e Lacerda 
+A935,MT,Porto Estrela 
+A923,MT,Primavera do Leste 
+A916,MT,Querência 
+A907,MT,Rondonópolis 
+A936,MT,Salto do Céu 
+A931,MT,Santo Antônio do Leste 
+A921,MT,São Félix do Araguaia 
+A903,MT,São José do Rio Claro 
+A911,MT,Sapezal 
+A917,MT,Sinop 
+A904,MT,Sorriso 
+A902,MT,Tangará da Serra 
+A922,MT,Vila Bela da Santíssima Trindade 
+A201,PA,Belém 
+A226,PA,Bragança 
+A228,PA,Breves 
+A236,PA,Cametá 
+A248,PA,Capitão Poço 
+A202,PA,Castanhal 
+A241,PA,Conceição do Araguaia 
+A252,PA,Dom Eliseu 
+A231,PA,Itaituba 
+A240,PA,Marabá 
+A209,PA,Medicilandia 
+A246,PA,Mina Palito 
+A239,PA,Monte Alegre 
+A235,PA,Novo Repartimento 
+A232,PA,Óbidos 
+A210,PA,Pacajá 
+A212,PA,Paragominas 
+A211,PA,Placas 
+A214,PA,Rondon do Pará 
+A215,PA,Salinópolis 
+A233,PA,Santana do Araguaia 
+A250,PA,Santarém 
+A216,PA,São Félix do Xingu 
+A230,PA,Serra dos Carajás 
+A227,PA,Soure 
+A213,PA,Tomé Açu 
+A234,PA,Tucumã 
+A229,PA,Tucuruí 
+A247,PA,Xinguara 
+A310,PB,Areia 
+A348,PB,Cabaceiras 
+A352,PB,Camaratuba 
+A313,PB,Campina Grande 
+A373,PB,Itaporanga 
+A320,PB,João Pessoa 
+A334,PB,Monteiro 
+A321,PB,Patos 
+A333,PB,São Gonçalo 
+A309,PE,Arco Verde 
+A329,PE,Cabrobó 
+A341,PE,Caruaru 
+A351,PE,Floresta 
+A322,PE,Garanhuns 
+A349,PE,Ibimirim 
+A366,PE,Ouricuri 
+A357,PE,Palmares 
+A307,PE,Petrolina 
+A301,PE,Recife 
+A370,PE,Salgueiro 
+A350,PE,Serra Talhada 
+A328,PE,Surubim 
+A336,PI,Alvorada do Gurguéia 
+A375,PI,Baixa Grande do Ribeiro 
+A326,PI,Bom Jesus do Piauí 
+A365,PI,Canto do Buriti 
+A337,PI,Caracol 
+A361,PI,Castelo do Piauí 
+A374,PI,Corrente 
+A338,PI,Esperantina 
+A311,PI,Floriano 
+A364,PI,Gilbués 
+A354,PI,Oeiras 
+A308,PI,Parnaíba 
+A330,PI,Paulistana 
+A343,PI,Picos 
+A335,PI,Piripiri 
+A331,PI,São João do Piauí 
+A362,PI,São Pedro do Piaui 
+A345,PI,São Raimundo Nonato 
+A312,PI,Teresina 
+A346,PI,Uruçui 
+A363,PI,Valença do Piauí 
+B803,PR,Campina da Lagoa 
+A819,PR,Castro 
+A869,PR,Cidade Gaúcha 
+A876,PR,Clevelândia 
+B806,PR,Colombo 
+A807,PR,Curitiba 
+A849,PR,Diamante do Norte 
+A843,PR,Dois Vizinhos 
+A846,PR,Foz do Iguaçu 
+A875,PR,General Carneiro 
+A824,PR,Icaraíma 
+A847,PR,Ilha do Mel 
+A823,PR,Inácio Martins 
+A818,PR,Ivaí 
+A871,PR,Japira 
+A821,PR,Joaquim Távora 
+B804,PR,Laranjeiras do Sul 
+A820,PR,Marechal Cândido Rondon 
+A835,PR,Maringá 
+A873,PR,Morretes 
+A842,PR,Nova Fátima 
+A822,PR,Nova Tebas 
+A850,PR,Paranapoema 
+A855,PR,Planalto 
+A874,PR,São Mateus do Sul 
+A872,PR,Ventania 
+A628,RJ,Angra dos Reis 
+A606,RJ,Arraial do Cabo 
+A604,RJ,Cambuci 
+A607,RJ,Campos dos Goytacazes 
+A620,RJ,Campos,São Tomé 
+A603,RJ,Duque de Caxias,Xerém 
+A635,RJ,Itatiaia,Parque Nacional 
+A608,RJ,Macaé 
+A624,RJ,Nova Friburgo-Salinas 
+A619,RJ,Paraty 
+A610,RJ,Petrópolis,Pico do Couto 
+A609,RJ,Resende 
+A626,RJ,Rio Claro (Passa Três) 
+A652,RJ,Rio de Janeiro,Forte de Copacabana 
+A636,RJ,Rio de Janeiro-Jacarepaguá 
+A602,RJ,Rio de Janeiro,Marambaia 
+A621,RJ,Rio de Janeiro,Vila Militar 
+A667,RJ,Saquarema,Sampaio Correia 
+A601,RJ,Seropédica,Ecologia Agrícola 
+A659,RJ,Silva Jardim 
+A618,RJ,Teresópolis,Parque Nacional 
+A625,RJ,Três Rios 
+A611,RJ,Valença 
+A340,RN,Apodi 
+A316,RN,Caicó 
+A344,RN,Calcanhar 
+A372,RN,Ipanguaçu 
+A317,RN,Macau 
+A318,RN,Mossoró 
+A304,RN,Natal 
+A367,RN,Santa Cruz 
+A940,RO,Ariquemes 
+A939,RO,Cacoal 
+A925,RO,Porto Velho 
+A938,RO,Vilhena 
+A135,RR,Boa Vista 
+A826,RS,Alegrete 
+A827,RS,Bagé 
+A840,RS,Bento Gonçalves 
+A812,RS,Caçapava do Sul 
+A838,RS,Camaquã 
+A897,RS,Cambará do Sul 
+A884,RS,Campo Bom 
+A879,RS,Canela 
+A811,RS,Canguçu 
+A853,RS,Cruz Alta 
+A881,RS,Dom Pedrito 
+A893,RS,Encruzilhada do Sul 
+A828,RS,Erechim 
+A854,RS,Frederico Westphalen 
+A883,RS,Ibirubá 
+A836,RS,Jaguarão 
+A844,RS,Lagoa Vemelha 
+A878,RS,Mostardas 
+A856,RS,Palmeira das Missões 
+A839,RS,Passo Fundo 
+A801,RS,Porto Alegre 
+A831,RS,Quaraí 
+A802,RS,Rio Grande 
+A813,RS,Rio Pardo 
+A803,RS,Santa Maria 
+A804,RS,Santana do Livramento 
+A810,RS,Santa Rosa 
+A899,RS,Santa Vitória do Palmar (Barra do Chuí) 
+A833,RS,Santiago 
+A805,RS,Santo Augusto 
+A830,RS,São Borja 
+A832,RS,São Gabriel 
+A829,RS,São José dos Ausentes 
+A852,RS,São Luiz Gonzaga 
+A889,RS,São Vicente do Sul 
+A894,RS,Serafina Corrêa 
+A837,RS,Soledade 
+A882,RS,Teutônia 
+A808,RS,Torres 
+A834,RS,Tramandaí 
+A886,RS,Tupanciretã 
+A809,RS,Uruguaiana 
+A880,RS,Vacaria 
+A867,SC,Araranguá 
+A859,SC,Caçador 
+A860,SC,Curitibanos 
+A848,SC,Dionísio Cerqueira 
+A806,SC,Florianópolis-São José 
+A817,SC,Indaial 
+A868,SC,Itajaí 
+A851,SC,Itapoá 
+A863,SC,Ituporanga 
+A841,SC,Joaçaba 
+A865,SC,Lages 
+A866,SC,Laguna (Farol Santa Marta) 
+A864,SC,Major Vieira 
+A845,SC,Morro da Igreja (Bom Jardim da Serra) 
+A816,SC,Novo Horizonte 
+A870,SC,Rancho Queimado 
+A861,SC,Rio do Campo 
+A862,SC,Rio Negrinho 
+A815,SC,São Joaquim 
+A857,SC,São Miguel do Oeste 
+A814,SC,Urussanga 
+A858,SC,Xanxerê 
+A409,SE,Aracaju 
+A421,SE,Brejo Grande 
+A420,SE,Carira 
+A451,SE,Itabaiana 
+A417,SE,Itabaianinha 
+A453,SE,Nossa Senhora da Glória 
+A419,SE,Poço Verde 
+A736,SP,Ariranha 
+A725,SP,Avaré 
+A741,SP,Barra Bonita 
+A746,SP,Barra do Turvo 
+A748,SP,Barretos 
+A755,SP,Baruerí 
+A705,SP,Bauru 
+A764,SP,Bebedouro 
+A765,SP,Bertioga 
+A744,SP,Bragança Paulista 
+A769,SP,Cachoeira Paulista 
+A706,SP,Campos do Jordão 
+A738,SP,Casa Branca 
+A762,SP,Dracena 
+A708,SP,Franca 
+A737,SP,Ibitinga 
+A712,SP,Iguape 
+A714,SP,Itapeva 
+A739,SP,Itapira 
+A753,SP,Ituverava 
+A733,SP,Jales 
+A735,SP,José Bonifácio 
+A727,SP,Lins 
+A763,SP,Marília 
+A716,SP,Ourinhos 
+A726,SP,Piracicaba 
+A747,SP,Pradópolis 
+A707,SP,Presidente Prudente 
+A718,SP,Rancharia 
+A766,SP,Registro 
+A711,SP,São Carlos 
+A740,SP,São Luis do Paraitinga 
+A715,SP,São Miguel Arcanjo 
+A701,SP,São Paulo (Mirante de Santana) 
+A771,SP,São Paulo-SESC Interlagos 
+A767,SP,São Sebastião 
+A713,SP,Sorocaba 
+A728,SP,Taubaté 
+A768,SP,Tupã 
+A734,SP,Valparaiso 
+A729,SP,Votuporanga 
+A053,TO,Almas 
+A054,TO,Araguaçu 
+A021,TO,Araguaina 
+A044,TO,Araguatins 
+A043,TO,Campos Lindos 
+A049,TO,Colinas do Tocantins 
+A038,TO,Dianópolis 
+A039,TO,Formoso do Araguaia 
+A019,TO,Gurupi 
+A055,TO,Lagoa da Confusão 
+A041,TO,Marianópolis do Tocantins 
+A040,TO,Mateiros 
+A009,TO,Palmas 
+A010,TO,Paranã 
+A020,TO,Pedro Afonso 
+A018,TO,Peixe 
+A051,TO,Pium 
+A050,TO,Rio Sono 
+A048,TO,Santa Fé do Araguaia 
+A052,TO,Santa Rosa do Tocantins 
+U560,UY,Colonia 
+U460,UY,Paso de los Toros 
+U565,UY,Rocha 
+U360,UY,Salto 
