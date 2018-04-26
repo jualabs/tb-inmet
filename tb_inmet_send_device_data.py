@@ -50,6 +50,7 @@ def send_data_from_file(file_path):
     data = data[:-1]
     # get station code
     station_code = file_path.split('.')[0].split('-')[-1]
+    station_code = 'test-device'
     # 1 - get device id from station code
     current_device_id = ""
     tqdm.write('start processing file: %s\n' % file_path.split('/')[-1])
@@ -94,7 +95,6 @@ def send_data_from_file(file_path):
         json_temp = {'invalid_sensors':''}
         # adjust data types
         for key, value in current_data.iteritems():
-            # if (key == 'hora' or key == 'vento_vel' or key == 'umid_max' or key == 'umid_min' or key == 'umid_inst'):
             if key in ['hora','vento_vel','umid_max','umid_min','umid_inst']:
                 try:
                     json_temp[key] = int(current_data[key])
@@ -115,6 +115,10 @@ def send_data_from_file(file_path):
         # clean last caracter from json invalid sensors key
         if json_temp['invalid_sensors'] != '':
             json_temp['invalid_sensors'] = json_temp['invalid_sensors'][0:-1]
+        # swap wind information due to problem on inmet crawled data vento_direcao <-> vento_vel
+        temp_value = json_temp['vento_vel']
+        json_temp['vento_vel'] = json_temp['vento_direcao']
+        json_temp['vento_direcao'] = temp_value
         # write data to thingsboard
         # 1 - format json
         json_data = {}
