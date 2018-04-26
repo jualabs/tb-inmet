@@ -1,0 +1,6 @@
+tb_api_access:
+    host: <your thingsboard host>
+    user: <your thingsboard user>
+    passwd: <your thingsboard password>
+tb_input_data:
+    root_folder: <your input files root folder>

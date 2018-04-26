@@ -5,36 +5,38 @@ from __future__ import print_function
 import calendar
 import swagger_client
 from swagger_client.rest import ApiException
-import ast
 import os
-import glob
 import csv
 import json
-import sys
-from tb_inmet_utils import get_api_configuration
+from tb_inmet_utils import get_api_tokens_from_password
 from tb_inmet_utils import renew_token
 from tqdm import tqdm
-import collections
-import sys
+import yaml
 
-# data files root folder
-#root_path = '/Users/victormedeiros/Downloads/inmet/inmet/data/'
-#root_path = '/home/tb-inmet/inmet/inmet/inmet/data/'
-if len(sys.argv) == 2:
-    root_path = sys.argv[1]
-    if root_path[-1] != '/':
-        root_path = root_path + '/'
-else:
-    tqdm.write("Usage: python tb_inmet_send_device_data <root-folder-path>")
-    exit()
+# get configurations from YAML config file
+with open("config.yaml", 'r') as yamlfile:
+    cfg = yaml.load(yamlfile)
 
-# get API configuration object
-#configuration = get_api_configuration(hostname='192.168.25.105:8080', username='victorwcm@gmail.com', password='')
-configuration = get_api_configuration(hostname='localhost:8080', username='victorwcm@gmail.com', password='')
+# set configurations values
+# set hostname, username and password from user
+configuration = swagger_client.Configuration()
+configuration.host = cfg['tb_api_access']['host']
+configuration.username = cfg['tb_api_access']['user']
+configuration.password = cfg['tb_api_access']['passwd']
+# set root path for input data files
+root_path = cfg['tb_input_data']['root_folder']
+if root_path[-1] != '/':
+    root_path = root_path + '/'
+# get tokens
+tokens = get_api_tokens_from_password(configuration.host, configuration.username, configuration.password)
+# configure API key authorization: X-Authorization
+configuration.api_key['X-Authorization'] = tokens['token']
+configuration.api_key_prefix['X-Authorization'] = 'Bearer'
 
 # create an instance of the API class
 device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))
 device_api_controller_api_inst = swagger_client.DeviceApiControllerApi(swagger_client.ApiClient(configuration))
+
 
 def send_data_from_file(file_path):
     file = open(file_path, 'r')
@@ -48,10 +50,6 @@ def send_data_from_file(file_path):
     data = data[:-1]
     # get station code
     station_code = file_path.split('.')[0].split('-')[-1]
-    # init DEBUG
-    #if (station_code != 'A239'):
-    #    return
-    # end DEBUG
     # 1 - get device id from station code
     current_device_id = ""
     tqdm.write('start processing file: %s\n' % file_path.split('/')[-1])
@@ -65,6 +63,7 @@ def send_data_from_file(file_path):
                 renew_token(configuration)
                 continue
             else:
+                # TODO: create device when it is not found? ask Professor Dr. Goncalves
                 tqdm.write("Exception when calling DeviceControllerApi->save_device_using_post: %s\n" % e)
         break
     # 2 - get device token from device id
@@ -95,28 +94,27 @@ def send_data_from_file(file_path):
         json_temp = {'invalid_sensors':''}
         # adjust data types
         for key, value in current_data.iteritems():
-            if (key == 'hora' or key == 'vento_vel' or key == 'umid_max' or key == 'umid_min' or key == 'umid_inst'):
+            # if (key == 'hora' or key == 'vento_vel' or key == 'umid_max' or key == 'umid_min' or key == 'umid_inst'):
+            if key in ['hora','vento_vel','umid_max','umid_min','umid_inst']:
                 try:
                     json_temp[key] = int(current_data[key])
                 except ValueError:
-                    json_temp['invalid_sensors'] = (key + ',');
-                    current_data[key] = '-';
+                    json_temp['invalid_sensors'] = json_temp['invalid_sensors'] + (key + ',')
+                    current_data[key] = '-'
                     tqdm.write('value not provided in file: %s at hour %s' % (file_path, current_data['hora']))
                     continue
-            elif (key == 'radiacao' or key == 'precipitacao' or key == 'vento_direcao' or key == 'vento_rajada' or
-                  key == 'temp_max' or key == 'temp_min' or key == 'temp_inst' or
-                  key == 'pressao_max' or key == 'pressao_min' or key == 'pressao' or
-                  key == 'pto_orvalho_max' or key == 'pto_orvalho_min' or key == 'pto_orvalho_inst'):
+            elif key in ['radiacao','precipitacao','vento_direcao','vento_rajada','temp_max','temp_min','temp_inst',
+                          'pressao_max','pressao_min','pressao','pto_orvalho_max','pto_orvalho_min','pto_orvalho_inst']:
                 try:
                     json_temp[key] = float(current_data[key])
                 except ValueError:
-                    json_temp['invalid_sensors'] = (key + ',');
-                    current_data[key] = '-';
+                    json_temp['invalid_sensors'] = json_temp['invalid_sensors'] + (key + ',')
+                    current_data[key] = '-'
                     tqdm.write('value not provided in file: %s at hour %s' % (file_path, current_data['hora']))
                     continue
         # clean last caracter from json invalid sensors key
         if json_temp['invalid_sensors'] != '':
-            json_temp['invalid_sensors'] = json_temp['invalid_sensors'][-1]
+            json_temp['invalid_sensors'] = json_temp['invalid_sensors'][0:-1]
         # write data to thingsboard
         # 1 - format json
         json_data = {}
@@ -158,5 +156,6 @@ def iterate_over_all_files(root_path):
             send_data_from_file(file_path)
             pbar.set_postfix(file=file_path, refresh=False)
             pbar.update()
+
 
 iterate_over_all_files(root_path)
