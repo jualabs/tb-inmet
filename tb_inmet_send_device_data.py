@@ -50,7 +50,6 @@ def send_data_from_file(file_path):
     data = data[:-1]
     # get station code
     station_code = file_path.split('.')[0].split('-')[-1]
-    station_code = 'test-device'
     # 1 - get device id from station code
     current_device_id = ""
     tqdm.write('start processing file: %s\n' % file_path.split('/')[-1])
