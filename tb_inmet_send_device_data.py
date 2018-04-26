@@ -99,14 +99,14 @@ def send_data_from_file(file_path):
         date = current_data['data'].split('/')
         time_tuple_utc = (int(date[2]), int(date[1]), int(date[0]), int(current_data['hora']), 0, 0)
         ts_utc = int(calendar.timegm(time_tuple_utc)) * 1000
-        json_temp = {'invalid_sensors':''}
+        json_temp = {'unavailable_data':''}
         # adjust data types
         for key, value in current_data.iteritems():
             if key in ['hora','vento_vel','umid_max','umid_min','umid_inst']:
                 try:
                     json_temp[key] = int(current_data[key])
                 except ValueError:
-                    json_temp['invalid_sensors'] = json_temp['invalid_sensors'] + (key + ',')
+                    json_temp['unavailable_data'] = json_temp['unavailable_data'] + (key + ',')
                     current_data[key] = '-'
                     tqdm.write('value not provided in file: %s at hour %s' % (file_path, current_data['hora']))
                     continue
@@ -115,13 +115,13 @@ def send_data_from_file(file_path):
                 try:
                     json_temp[key] = float(current_data[key])
                 except ValueError:
-                    json_temp['invalid_sensors'] = json_temp['invalid_sensors'] + (key + ',')
+                    json_temp['unavailable_data'] = json_temp['unavailable_data'] + (key + ',')
                     current_data[key] = '-'
                     tqdm.write('value not provided in file: %s at hour %s' % (file_path, current_data['hora']))
                     continue
-        # clean last caracter from json invalid sensors key
-        if json_temp['invalid_sensors'] != '':
-            json_temp['invalid_sensors'] = json_temp['invalid_sensors'][0:-1]
+        # clean last caracter from json unavailable_data key
+        if json_temp['unavailable_data'] != '':
+            json_temp['unavailable_data'] = json_temp['unavailable_data'][0:-1]
         # swap wind information due to problem on inmet crawled data vento_direcao <-> vento_vel
         temp_value = json_temp['vento_vel']
         json_temp['vento_vel'] = json_temp['vento_direcao']
