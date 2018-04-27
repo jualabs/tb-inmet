@@ -123,9 +123,18 @@ def send_data_from_file(file_path):
         if json_temp['unavailable_data'] != '':
             json_temp['unavailable_data'] = json_temp['unavailable_data'][0:-1]
         # swap wind information due to problem on inmet crawled data vento_direcao <-> vento_vel
-        temp_value = json_temp['vento_vel']
-        json_temp['vento_vel'] = json_temp['vento_direcao']
-        json_temp['vento_direcao'] = temp_value
+        wind_direction = ''
+        wind_speed = ''
+        if 'vento_vel' in json_temp:
+            wind_direction = json_temp['vento_vel']
+            json_temp.pop('vento_vel')
+        if 'vento_direcao' in json_temp:
+            wind_speed = json_temp['vento_direcao']
+            json_temp.pop('vento_direcao')
+        if wind_direction != '':
+            json_temp['vento_direcao'] = wind_direction
+        if wind_speed != '':
+            json_temp['vento_vel'] = wind_speed
         # write data to thingsboard
         # 1 - format json
         json_data = {}
