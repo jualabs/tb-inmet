@@ -24,8 +24,6 @@ device_api_controller_api_inst = swagger_client.DeviceApiControllerApi(swagger_c
 asset_controller_api_inst = swagger_client.AssetControllerApi(swagger_client.ApiClient(configuration))
 entity_relation_controller_api_inst = swagger_client.EntityRelationControllerApi(swagger_client.ApiClient(configuration))
 
-
-
 def get_inmet_stations_metadata(cfg_params):
     stations_metadata = []
     # get INMET html station data
@@ -161,47 +159,68 @@ def set_station_attributes(access_token, attributes):
         break
 
 
-def get_state_id(state):
+def create_asset(asset_name, type='STATE'):
+    asset = swagger_client.Asset()
+    asset.name = asset_name
+    asset.type = type
+    try:
+        api_response = asset_controller_api_inst.save_asset_using_post(asset)
+    except ApiException as e:
+        print("Exception when calling AssetControllerApi->save_asset_using_post: %s\n" % e)
+
+    return api_response.id.id
+
+def get_asset_id(asset_name):
     # get state entity id
-    asset_name = state
+    asset_name = asset_name
     try:
         # getTenantAssets
         api_response = asset_controller_api_inst.get_tenant_assets_using_get('1', text_search=asset_name)
     except ApiException as e:
         print("Exception when calling AssetControllerApi->get_tenant_assets_using_get: %s\n" % e)
-    entityId = swagger_client.EntityId('ASSET', id=api_response.data[0].id.id)
+    # if not state does not exist, create it and start a relation with region 'Especiais'
+    if not api_response.data:
+        state_asset_id = create_asset(asset_name)
+        entityId = swagger_client.EntityId('ASSET', state_asset_id)
+        set_relation(get_asset_id('Especiais'), entityId)
+    else:
+        state_asset_id = api_response.data[0].id.id
+        entityId = swagger_client.EntityId('ASSET', state_asset_id)
+
     return entityId
 
 
-def set_station_relations(station, device_id):
-    station_entity_id = swagger_client.EntityId('DEVICE', id=device_id)
-    state_entity_id = get_state_id(station['stationState'])
+def set_relation(from_id, to_id, relation_type='Contains'):
     relation = swagger_client.EntityRelation()
-    relation.type = 'Contains'
-    relation._from = state_entity_id
-    relation.to = station_entity_id
+    relation.type = relation_type
+    relation._from = from_id
+    relation.to = to_id
     try:
         entity_relation_controller_api_inst.save_relation_using_post(relation)
     except ApiException as e:
         print("Exception when calling EntityRelationControllerApi->save_relation_using_post: %s\n" % e)
 
 
-# get INMET html stations metadata
-stations_metadata = get_inmet_stations_metadata(cfg_params)
-# get current inmet stations names from TB
-current_stations_in_tb = get_tb_inmet_current_stations(cfg_params)
-# verify whether a new station exists
-new_stations = []
-for station in stations_metadata:
-    # if there is a new station loads its metadata in TB
-    if station['stationCode'] not in current_stations_in_tb:
-        new_stations.append(station)
-# create new stations at TB
-for station in new_stations:
-    attributes = ast.literal_eval(json.dumps(station, ensure_ascii=False))
-    device_id = create_station(station['stationCode'])
-    access_token = get_station_access_token(device_id)
-    set_station_attributes(access_token, attributes)
-    set_station_relations(station, device_id)
+def main():
+    # get INMET html stations metadata
+    stations_metadata = get_inmet_stations_metadata(cfg_params)
+    # get current inmet stations names from TB
+    current_stations_in_tb = get_tb_inmet_current_stations(cfg_params)
+    # verify whether a new station exists
+    new_stations = []
+    for station in stations_metadata:
+        # if there is a new station loads its metadata in TB
+        if station['stationCode'] not in current_stations_in_tb:
+            new_stations.append(station)
+    # create new stations at TB
+    for station in new_stations:
+        attributes = ast.literal_eval(json.dumps(station, ensure_ascii=False))
+        device_id = create_station(station['stationCode'])
+        access_token = get_station_access_token(device_id)
+        set_station_attributes(access_token, attributes)
+        set_relation(get_asset_id(station['stationState'], swagger_client.EntityId('DEVICE', id=device_id)))
 
+
+if __name__ == '__main__':
+    main()
 
