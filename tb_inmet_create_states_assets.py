@@ -31,6 +31,8 @@ states_on_regions = {'Norte':['AC','AP','AM','PA','RO','RR','TO'],
                      'Sudeste':['ES','MG','RJ','SP'],
                      'Centro-Oeste':['DF','GO','MT','MS']}
 
+regions = ['Norte', 'Nordeste', 'Sul', 'Sudeste', 'Centro-Oeste']
+
 # create an instance of the API class
 asset_controller_api_inst = swagger_client.AssetControllerApi(swagger_client.ApiClient(configuration))
 
@@ -47,3 +49,22 @@ for k, v in states_on_regions.iteritems():
             print('created asset %s' % state)
         except ApiException as e:
             print("Exception when calling AssetControllerApi->save_asset_using_post: %s\n" % e)
+
+for region in regions:
+    asset.name = region
+    asset.type = 'REGION'
+    try:
+        # saveAsset
+        api_response = asset_controller_api_inst.save_asset_using_post(asset)
+        print('created asset %s' % region)
+    except ApiException as e:
+        print("Exception when calling AssetControllerApi->save_asset_using_post: %s\n" % e)
+
+asset.name = 'INMET Stations'
+asset.type = 'INSTITUTION'
+try:
+    # saveAsset
+    api_response = asset_controller_api_inst.save_asset_using_post(asset)
+    print('created asset %s' % asset.name)
+except ApiException as e:
+    print("Exception when calling AssetControllerApi->save_asset_using_post: %s\n" % e)

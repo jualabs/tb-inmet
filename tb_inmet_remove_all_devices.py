@@ -5,7 +5,7 @@ from __future__ import print_function
 import swagger_client
 from swagger_client.rest import ApiException
 from pprint import pprint
-from tb_inmet_utils import get_api_configuration
+# from tb_inmet_utils import get_api_configuration
 from tb_inmet_utils import renew_token
 import csv
 import json
@@ -13,7 +13,10 @@ import json
 # read data related to stations metadata
 csv_file = open("stations.csv", 'r')
 # get API configuration object
-configuration = get_api_configuration(hostname='', username='', password='')
+# configuration = get_api_configuration(hostname='', username='', password='')
+hostname = 'localhost:9090'
+username = 'victor@jualabs.com'
+password = 'victor'
 
 # create an instance of the API class
 device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))

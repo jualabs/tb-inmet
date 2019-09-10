@@ -18,8 +18,9 @@ from datetime import datetime, timedelta
 import csv
 import calendar
 import tqdm
-
-
+from lxml import html
+import base64
+import time
 
 # load configurations from YAML config file
 with open("config.yaml", 'r') as yamlfile:
@@ -166,7 +167,7 @@ def get_station_attributes(station_token):
     client_keys = 'url,mostRecentData'
     url = 'http://'+ cfg_params['tb_api_access']['host'] + '/api/v1/' + station_token + '/attributes?clientKeys=' + client_keys
     r = requests.get(url)
-    return r
+    return ast.literal_eval(r.content)
 
 def set_station_attributes(station_token, attributes):
     # set station attributes
@@ -197,12 +198,21 @@ def format_data(rawData):
 
 def run_crawler(start_date, end_date, url):
 
+    # first get base page
+    resp = requests.get(url)
+    tree = html.fromstring(resp.content)
+    aleaValue = tree.xpath('//input[@type="hidden" and @name="aleaValue"]/@value')[0]
+    xaleaValue = tree.xpath('//input[@type="hidden" and @name="xaleaValue"]/@value')[0]
+    xID = tree.xpath('//input[@type="hidden" and @name="xID"]/@value')[0]
+    aleaNum = int(base64.b64decode(aleaValue))
     # define time period and create session
     form = {
         'dtaini': start_date.strftime("%d/%m/%Y"),
         'dtafim': end_date.strftime("%d/%m/%Y"),
-        'aleaValue': 'NDgyOA==',
-        'aleaNum': '4828'
+        'aleaValue': aleaValue,
+        'aleaNum': aleaNum,
+        'xaleaValue': xaleaValue,
+        'xID': xID
     }
     encondedForm = urllib.urlencode(form)
     head = {
@@ -282,6 +292,7 @@ def load_station_data(station_token, station_data):
         # 2 - write data
         while True:
             try:
+                # time.sleep(0.5)
                 api_response = device_api_controller_api_inst.post_telemetry_using_post(station_token, json_data)
             except ApiException as e:
                 if (json.loads(e.body)['message'] == 'Token has expired'):

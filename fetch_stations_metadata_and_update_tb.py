@@ -15,6 +15,8 @@ import ast
 with open("config.yaml", 'r') as yamlfile:
     cfg_params = yaml.load(yamlfile)
 
+TB_HOST = cfg_params['tb_api_access']['host']
+
 # get API access configuration object
 configuration = get_tb_api_configuration(cfg_params)
 
@@ -23,6 +25,27 @@ device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.A
 device_api_controller_api_inst = swagger_client.DeviceApiControllerApi(swagger_client.ApiClient(configuration))
 asset_controller_api_inst = swagger_client.AssetControllerApi(swagger_client.ApiClient(configuration))
 entity_relation_controller_api_inst = swagger_client.EntityRelationControllerApi(swagger_client.ApiClient(configuration))
+
+def get_current_token():
+    url = 'http://' + TB_HOST + '/api/auth/login'
+
+    headers = {}
+    headers['Content-Type'] = 'application/json'
+    headers['Accept'] = 'application/json'
+
+    values_token = {}
+    values_token['username'] = cfg_params['tb_api_access']['user']
+    values_token['password'] = cfg_params['tb_api_access']['passwd']
+    result = requests.post(url, json=values_token)
+    json_message = json.loads(result.content)
+
+    token = {}
+    # print 'Bearer ' + json_message['token']
+    token['X-Authorization'] = 'Bearer ' + json_message['token']
+    token['Content-Type'] = 'application/json'
+    token['Accept'] = 'application/json'
+
+    return token
 
 def get_inmet_stations_metadata(cfg_params):
     stations_metadata = []
@@ -82,6 +105,63 @@ def get_inmet_stations_metadata(cfg_params):
             continue
     return stations_metadata
 
+def get_asset_id_by_name(name, token):
+    asset_id = ''
+    # try to get the asset id by name, if not find it returns an empty string
+    url = 'http://' + TB_HOST + '/api/tenant/assets?assetName=' + name
+    result = requests.get(url, headers=token)
+    result = json.loads(result.content)
+    try:
+        asset_id = result['id']['id']
+    except:
+        asset_id = ''
+        pass
+    return asset_id
+
+def create_asset(name, type='STATE'):
+    url = 'http://' + TB_HOST + '/api/asset'
+
+    params = {}
+    params['name'] = name
+    params['type'] = type
+    result = requests.post(url, json=params, headers=get_current_token())
+    result_json = json.loads(result.content)
+    return result_json['id']['id']
+
+def create_relation(relation):
+    url = 'http://' + TB_HOST + '/api/relation'
+    result = requests.post(url, json=relation, headers=get_current_token())
+    return result.status_code
+
+
+def get_inmet_root_asset_id():
+    root_asset_id = get_asset_id_by_name('INMET', get_current_token())
+    # if there is no root INMET asset, create it, regions, states and relations
+    if root_asset_id == '':
+        regions = {'NORTH': 0, 'NORTHEAST': 0, 'SOUTH': 0, 'SOUTHEAST': 0, 'MIDWEST': 0}
+        states_on_regions = {'NORTH':{'AC': 0, 'AP': 0, 'AM': 0, 'PA': 0, 'RO': 0, 'RR': 0, 'TO': 0},
+                             'NORTHEAST':{'AL': 0, 'BA': 0, 'CE': 0, 'MA': 0, 'PB': 0, 'PE': 0, 'PI': 0, 'RN': 0, 'SE': 0},
+                             'SOUTH':{'PR': 0, 'RS': 0, 'SC': 0},
+                             'SOUTHEAST':{'ES': 0, 'MG': 0, 'RJ': 0, 'SP': 0},
+                             'MIDWEST':{'DF': 0, 'GO': 0, 'MT': 0, 'MS': 0}}
+        relation = {'from': {'entityType': 'ASSET', 'id': root_asset_id},
+                    'to':   {'entityType': 'ASSET', 'id': ""},
+                    'type': 'Contains'}
+        # create INMET root asset
+        root_asset_id = create_asset('INMET', 'INSTITUTION')
+        relation['from']['id'] = root_asset_id
+        # create REGIONS and relation to INMET
+        for region_name, region_id in regions.items():
+            regions[region_name] = create_asset(region_name, 'REGION')
+            relation['to']['id'] = regions[region_name]
+            create_relation(relation)
+        # create STATES and relations to their REGIONS
+        for region_name, states in states_on_regions.items():
+            relation['from']['id'] = regions[region_name]
+            for state_name, state_id in states.items():
+                states[state_name] = create_asset(state_name, 'STATE')
+                relation['to']['id'] = states[state_name]
+                create_relation(relation)
 
 def get_tb_inmet_current_stations(cfg_params):
 
@@ -159,7 +239,7 @@ def set_station_attributes(access_token, attributes):
         break
 
 
-def create_asset(asset_name, type='STATE'):
+def create_asset_old(asset_name, type='STATE'):
     asset = swagger_client.Asset()
     asset.name = asset_name
     asset.type = type
@@ -204,8 +284,11 @@ def set_relation(from_id, to_id, relation_type='Contains'):
 def main():
     # get INMET html stations metadata
     stations_metadata = get_inmet_stations_metadata(cfg_params)
+    # get INMET root asset
+    get_inmet_root_asset_id()
     # get current inmet stations names from TB
-    current_stations_in_tb = get_tb_inmet_current_stations(cfg_params)
+    # current_stations_in_tb = get_tb_inmet_current_stations(cfg_params)
+    current_stations_in_tb = []
     # verify whether a new station exists
     new_stations = []
     for station in stations_metadata:
@@ -218,7 +301,7 @@ def main():
         device_id = create_station(station['stationCode'])
         access_token = get_station_access_token(device_id)
         set_station_attributes(access_token, attributes)
-        set_relation(get_asset_id(station['stationState'], swagger_client.EntityId('DEVICE', id=device_id)))
+        set_relation(get_asset_id(station['stationState']), swagger_client.EntityId('DEVICE', id=device_id))
 
 
 if __name__ == '__main__':

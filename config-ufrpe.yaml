@@ -1,0 +1,8 @@
+tb_api_access:
+    host: app.deinfo.ufrpe.br/tb
+    user: jualabs@gmail.com
+    passwd: Ju@L@bs2019
+tb_entities_access:
+    root_asset_id: 82d586b0-d3d4-11e9-b876-014ab87b0940
+inmet_info:
+    metadata_source_url: http://www.inmet.gov.br/sonabra/maps/pg_mapa.php
