@@ -1,8 +1,8 @@
 tb_api_access:
     # host: app.deinfo.ufrpe.br
-    host: localhost:9090
-    user: victor@jualabs.com
-    passwd: victor
+    host: demo.thingsboard.io
+    user: victorwcm@gmail.com
+    passwd: borabora
 tb_entities_access:
     # root_asset_id: 6541ff70-44ba-11e8-83ff-4dab07e2b8fb
     #root_asset_id: 0361b2e0-d3d5-11e9-a922-1351a66ad677
