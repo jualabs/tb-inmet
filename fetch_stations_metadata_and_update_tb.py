@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import swagger_client
-from swagger_client.rest import ApiException
-from tb_inmet_utils import renew_token
-from tb_inmet_utils import get_tb_api_configuration
 import json
 import requests
 import yaml
@@ -13,39 +9,89 @@ import ast
 
 # load configurations from YAML config file
 with open("config.yaml", 'r') as yamlfile:
-    cfg_params = yaml.load(yamlfile)
+    cfg_params = yaml.full_load(yamlfile)
 
 TB_HOST = cfg_params['tb_api_access']['host']
+token = ''
+refresh_token = ''
 
-# get API access configuration object
-configuration = get_tb_api_configuration(cfg_params)
+def process_rest_result(result):
+    # verify if it is a authentication error
+    if (result.status_code == 401):
+        # verify if it is an expired token error
+        if(result.errorCode == 11):
+            get_new_token()
+        if(result.errorCode == 10):
+            print('unauthorized')
+    elif (result.status_code == 204):
+        print('no content')
+    elif (result.status_code == 403):
+        print('forbidden')
+    
 
-# create instances of the API class
-device_controller_api_inst = swagger_client.DeviceControllerApi(swagger_client.ApiClient(configuration))
-device_api_controller_api_inst = swagger_client.DeviceApiControllerApi(swagger_client.ApiClient(configuration))
-asset_controller_api_inst = swagger_client.AssetControllerApi(swagger_client.ApiClient(configuration))
-entity_relation_controller_api_inst = swagger_client.EntityRelationControllerApi(swagger_client.ApiClient(configuration))
+def get_token():
+    token_header = {}
+    # if token global variable is blank we are not logged in
+    if not token:
+        print('you are not logged in. call login() first.')
+    # return current token
+    else:
+        token_header['X-Authorization'] = 'Bearer ' + token
+        token_header['Content-Type'] = 'application/json'
+        token_header['Accept'] = 'application/json'
+        
+    return token_header
 
-def get_current_token():
+def get_new_token():
+    global token
+    global refresh_token
+    url = 'http://' + TB_HOST + '/api/auth/token'
+
+    headers = {}
+    headers['Content-Type'] = 'application/json'
+    headers['Accept'] = 'application/json'
+
+    json_body = {}
+    json_body['refreshToken'] = refresh_token
+    try:
+        result = requests.post(url, headers=headers, json=json_body)
+    except ConnectionError:
+        print('connection problem on: get_new_token()')
+    
+    result_json = json.loads(result.content)
+    
+    try:
+        token = result_json['token']
+        refresh_token = result_json['refreshToken']
+    except KeyError:
+        print('unable to get token!')
+
+    return get_token()
+
+def login():
+    global token
+    global refresh_token
     url = 'http://' + TB_HOST + '/api/auth/login'
 
     headers = {}
     headers['Content-Type'] = 'application/json'
     headers['Accept'] = 'application/json'
 
-    values_token = {}
-    values_token['username'] = cfg_params['tb_api_access']['user']
-    values_token['password'] = cfg_params['tb_api_access']['passwd']
-    result = requests.post(url, json=values_token)
-    json_message = json.loads(result.content)
-
-    token = {}
-    # print 'Bearer ' + json_message['token']
-    token['X-Authorization'] = 'Bearer ' + json_message['token']
-    token['Content-Type'] = 'application/json'
-    token['Accept'] = 'application/json'
-
-    return token
+    json_body = {}
+    json_body['username'] = cfg_params['tb_api_access']['user']
+    json_body['password'] = cfg_params['tb_api_access']['passwd']
+    
+    try:
+        result = requests.post(url, headers=headers, json=json_body)
+    except ConnectionError:
+        print('connection problem on: login()')
+    
+    result_json = json.loads(result.content)
+    try:
+        token = result_json['token']
+        refresh_token = result_json['refreshToken']
+    except KeyError:
+        print('unable to get token!')
 
 def get_inmet_stations_metadata(cfg_params):
     stations_metadata = []
@@ -105,190 +151,192 @@ def get_inmet_stations_metadata(cfg_params):
             continue
     return stations_metadata
 
-def get_asset_id_by_name(name, token):
-    asset_id = ''
-    # try to get the asset id by name, if not find it returns an empty string
-    url = 'http://' + TB_HOST + '/api/tenant/assets?assetName=' + name
-    result = requests.get(url, headers=token)
-    result = json.loads(result.content)
+# entity_type refers to ASSET or DEVICE and type the asset type or device type
+def create_entity(name, entity_type='DEVICE', type='AUTOMATIC-STATION'):
+    entity_id = ''
+    if (entity_type == 'DEVICE'):
+        url = 'http://' + TB_HOST + '/api/device'
+    elif (entity_type == 'ASSET'):
+        url = 'http://' + TB_HOST + '/api/asset'
+    else: 
+        print('invalid entity type.')
+        return
+
+    json_body = {}
+    json_body['name'] = name
+    json_body['type'] = type
+
     try:
-        asset_id = result['id']['id']
-    except:
-        asset_id = ''
-        pass
-    return asset_id
+        result = requests.post(url, json=json_body, headers=get_token())
+        # verify if it is an expired token error
+        if (result.status_code == 401 and result.errorCode == 11):
+            result = requests.post(url, json=json_body, headers=get_new_token())
+        # in the case that there are no errors
+        if (result.status_code == 200):
+            result_json = json.loads(result.content)
+            entity_id = result_json['id']['id']
+        
+    except ConnectionError:
+        print('connection problem on: create_entity()') 
 
-def create_asset(name, type='STATE'):
-    url = 'http://' + TB_HOST + '/api/asset'
-
-    params = {}
-    params['name'] = name
-    params['type'] = type
-    result = requests.post(url, json=params, headers=get_current_token())
     result_json = json.loads(result.content)
-    return result_json['id']['id']
+    
+    return entity_id
 
-def create_relation(relation):
+def create_relation(from_id, from_type, to_id, to_type, relation_type='Contains'):
     url = 'http://' + TB_HOST + '/api/relation'
-    result = requests.post(url, json=relation, headers=get_current_token())
+
+    json_body = {'from': {'entityType': from_type, 'id': from_id},
+                 'to':   {'entityType': to_type, 'id': to_id},
+                 'type': relation_type}
+    result = {}
+
+    try:
+        result = requests.post(url, json=json_body, headers=get_token())
+        if (result.status_code == 401 and result.errorCode == 11):
+            result = requests.post(url, json=json_body, headers=get_new_token())
+    except ConnectionError:
+        print('connection problem on: create_relation()') 
+    
     return result.status_code
 
+def get_all_entities_from_type(entity_type):
+    result = {}
+    # try to get the asset id by name, if not find it returns an empty string
+    # TODO: change the fixed limit
+    if (entity_type == 'DEVICE'):
+        url = 'http://' + TB_HOST + '/api/tenant/devices?limit=1000'
+    elif (entity_type == 'ASSET'):
+        url = 'http://' + TB_HOST + '/api/tenant/assets?limit=1000'
+    else: 
+        print('invalid entity type.')
+        return
+    
+    try:
+        result = requests.get(url, headers=get_token())
+        if (result.status_code == 401 and result.errorCode == 11):
+            result = requests.get(url, headers=get_new_token())
+    except  ConnectionError:
+        print('connection problem on: get_all_entities_from_type()') 
+    
+    result = json.loads(result.content)
+
+    try:
+        result = result['data']
+    except  KeyError:
+        print('no entities from type ' + entity_type +  ' available.')
+        result = []
+        pass 
+
+    return result
+
+def delete_entity(entity_id, entity_type='DEVICE'):
+    if (entity_type == 'DEVICE'):
+        url = 'http://' + TB_HOST + '/api/device/' + entity_id
+    elif (entity_type == 'ASSET'):
+        url = 'http://' + TB_HOST + '/api/asset/' + entity_id
+    else: 
+        print('invalid entity type.')
+        return
+
+    result = {}
+    
+    try:
+        result = requests.delete(url, headers=get_token())
+        if (result.status_code == 401 and result.errorCode == 11):
+            result = requests.delete(url, headers=get_new_token())
+    except ConnectionError:
+        print('connection problem on: delete_entity()') 
+    
+    return result.status_code
+
+def delete_all_entities_from_type(entity_type='DEVICE'):
+    all_entities = get_all_entities_from_type(entity_type=entity_type)
+
+    for entity in all_entities:
+        delete_entity(entity_id=entity['id']['id'], entity_type=entity_type)
 
 def get_inmet_root_asset_id():
-    root_asset_id = get_asset_id_by_name('INMET', get_current_token())
+    root_asset_id = get_asset_id('INMET')
     # if there is no root INMET asset, create it, regions, states and relations
     if root_asset_id == '':
-        regions = {'NORTH': 0, 'NORTHEAST': 0, 'SOUTH': 0, 'SOUTHEAST': 0, 'MIDWEST': 0}
-        states_on_regions = {'NORTH':{'AC': 0, 'AP': 0, 'AM': 0, 'PA': 0, 'RO': 0, 'RR': 0, 'TO': 0},
-                             'NORTHEAST':{'AL': 0, 'BA': 0, 'CE': 0, 'MA': 0, 'PB': 0, 'PE': 0, 'PI': 0, 'RN': 0, 'SE': 0},
-                             'SOUTH':{'PR': 0, 'RS': 0, 'SC': 0},
-                             'SOUTHEAST':{'ES': 0, 'MG': 0, 'RJ': 0, 'SP': 0},
-                             'MIDWEST':{'DF': 0, 'GO': 0, 'MT': 0, 'MS': 0}}
-        relation = {'from': {'entityType': 'ASSET', 'id': root_asset_id},
-                    'to':   {'entityType': 'ASSET', 'id': ""},
-                    'type': 'Contains'}
+        states_on_regions = {'NORTH':['AC', 'AP', 'AM', 'PA', 'RO', 'RR', 'TO'],
+                             'NORTHEAST':['AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'],
+                             'SOUTH':['PR', 'RS', 'SC'],
+                             'SOUTHEAST':['ES', 'MG', 'RJ', 'SP'],
+                             'MIDWEST':['DF', 'GO', 'MT', 'MS'],
+                             'SPECIALS':[]}
         # create INMET root asset
-        root_asset_id = create_asset('INMET', 'INSTITUTION')
-        relation['from']['id'] = root_asset_id
-        # create REGIONS and relation to INMET
-        for region_name, region_id in regions.items():
-            regions[region_name] = create_asset(region_name, 'REGION')
-            relation['to']['id'] = regions[region_name]
-            create_relation(relation)
-        # create STATES and relations to their REGIONS
+        root_asset_id = create_entity(name='INMET', entity_type='ASSET', type='INSTITUTION')
+        # create REGION and STATES and relations to their REGIONS and INMET
         for region_name, states in states_on_regions.items():
-            relation['from']['id'] = regions[region_name]
-            for state_name, state_id in states.items():
-                states[state_name] = create_asset(state_name, 'STATE')
-                relation['to']['id'] = states[state_name]
-                create_relation(relation)
-
-def get_tb_inmet_current_stations(cfg_params):
-
-    relation_search_parameters = swagger_client.RelationsSearchParameters(
-        root_id=cfg_params['tb_entities_access']['root_asset_id'], root_type='ASSET', direction='FROM', max_level=0)
-    query = swagger_client.DeviceSearchQuery(device_types=['automatic-station'], parameters=relation_search_parameters,
-                                             relation_type='Contains')
-    query.parameters = relation_search_parameters
-
-    while True:
-        try:
-            devices_list = device_controller_api_inst.find_by_query_using_post1(query)
-            # print(devices_list)
-        except ApiException as e:
-            if (json.loads(e.body)['message'] == 'Token has expired'):
-                renew_token(configuration)
-                continue
-            else:
-                print("Exception when calling DeviceControllerApi->find_by_query_using_post1: %s\n" % e)
-        break
-    # create a list with all current stations name
-    current_stations_name_list = []
-    for station in devices_list:
-        current_stations_name_list.append(station.name)
-
-    return current_stations_name_list
-
-
-def create_station(station_name, type='automatic-station'):
-    device = swagger_client.Device(name=station_name, type=type)
-    created_device_id = ''
-    while True:
-        try:
-            api_response = device_controller_api_inst.save_device_using_post(device)
-            created_device_id = api_response.id.id
-        except ApiException as e:
-            if (json.loads(e.body)['message'] == 'Token has expired'):
-                renew_token(configuration)
-                continue
-            else:
-                print('station already exists!')
-                print("Exception when calling DeviceControllerApi->save_device_using_post: %s\n" % e)
-        break
-    return created_device_id
+            region_id = create_entity(name=region_name, entity_type='ASSET', type='REGION')
+            create_relation(root_asset_id, 'ASSET', region_id, 'ASSET')
+            for state_name in states:
+                state_id = create_entity(name=state_name, entity_type='ASSET', type='STATE')
+                create_relation(region_id, 'ASSET', state_id, 'ASSET')
 
 
 def get_station_access_token(device_id):
-    device_access_token= ''
-    # get device credentials
-    while True:
-        try:
-            api_response = device_controller_api_inst.get_device_credentials_by_device_id_using_get(device_id)
-            device_access_token = api_response.credentials_id
-        except ApiException as e:
-            if (json.loads(e.body)['message'] == 'Token has expired'):
-                renew_token(configuration)
-                continue
-            else:
-                print("Exception when calling DeviceControllerApi->get_device_credentials_by_device_id_using_get: %s\n" % e)
-        break
-    return device_access_token
-
-
-def set_station_attributes(access_token, attributes):
-    # post station attributes
-    while True:
-        try:
-            api_response = device_api_controller_api_inst.post_device_attributes_using_post(access_token, attributes)
-        except ApiException as e:
-            if (json.loads(e.body)['message'] == 'Token has expired'):
-                renew_token(configuration)
-                continue
-            else:
-                print("Exception when calling DeviceApiControllerApi->post_device_attributes_using_post: %s\n" % e)
-        break
-
-
-def create_asset_old(asset_name, type='STATE'):
-    asset = swagger_client.Asset()
-    asset.name = asset_name
-    asset.type = type
+    url = 'http://' + TB_HOST + '/api/device/' + device_id + '/credentials'
+    
+    credentials = ''
     try:
-        api_response = asset_controller_api_inst.save_asset_using_post(asset)
-    except ApiException as e:
-        print("Exception when calling AssetControllerApi->save_asset_using_post: %s\n" % e)
+        result = requests.get(url, headers=get_token())
+        if (result.status_code == 401 and result.errorCode == 11):
+            result = requests.get(url, headers=get_new_token())
+        result_json = json.loads(result.content)
+        credentials = result_json['credentialsId']
+    except  ConnectionError:
+        print('connection problem on: get_station_access_token()') 
+    except KeyError:
+        raise Exception(result_json['message'])
+    
+    return credentials
 
-    return api_response.id.id
+def set_station_attributes(device_id, attributes):
+    # TODO: corrigir o scope
+    url = 'http://' + TB_HOST + '/api/plugins/telemetry/DEVICE/' + device_id + '/attributes/CLIENT_SCOPE'
+    
+    result = ''
+
+    try:
+        result = requests.post(url, json=attributes, headers=get_token())
+        if (result.status_code == 401 and result.errorCode == 11):
+            result = requests.post(url, json=attributes, headers=get_new_token())
+    except  ConnectionError:
+        print('connection problem on: set_station_attributes()')   
+    
+    result_json = json.loads(result.content)
 
 def get_asset_id(asset_name):
-    # get state entity id
-    asset_name = asset_name
+    asset_id = ''
+    url = 'http://' + TB_HOST + '/api/tenant/assets?assetName=' + asset_name
+    
     try:
-        # getTenantAssets
-        api_response = asset_controller_api_inst.get_tenant_assets_using_get('1', text_search=asset_name)
-    except ApiException as e:
-        print("Exception when calling AssetControllerApi->get_tenant_assets_using_get: %s\n" % e)
-    # if not state does not exist, create it and start a relation with region 'Especiais'
-    if not api_response.data:
-        state_asset_id = create_asset(asset_name)
-        entityId = swagger_client.EntityId('ASSET', state_asset_id)
-        set_relation(get_asset_id('Especiais'), entityId)
-    else:
-        state_asset_id = api_response.data[0].id.id
-        entityId = swagger_client.EntityId('ASSET', state_asset_id)
-
-    return entityId
-
-
-def set_relation(from_id, to_id, relation_type='Contains'):
-    relation = swagger_client.EntityRelation()
-    relation.type = relation_type
-    relation._from = from_id
-    relation.to = to_id
-    try:
-        entity_relation_controller_api_inst.save_relation_using_post(relation)
-    except ApiException as e:
-        print("Exception when calling EntityRelationControllerApi->save_relation_using_post: %s\n" % e)
+        result = requests.get(url, headers=get_token())
+        if (result.status_code == 401 and result.errorCode == 11):
+            result = requests.get(url, headers=get_new_token())
+        result_json = json.loads(result.content)
+        asset_id = result_json['id']['id']
+    except  ConnectionError:
+        print('connection problem on: get_asset_id()')   
+    except KeyError:
+        asset_id = create_entity(name=asset_name, entity_type='ASSET', type='STATE')
+        create_relation(get_asset_id('SPECIALS'), from_type='ASSET', to_id=asset_id, to_type='ASSET')
+        pass
+    
+    return asset_id
 
 
 def main():
+    login()
     # get INMET html stations metadata
     stations_metadata = get_inmet_stations_metadata(cfg_params)
     # get INMET root asset
     get_inmet_root_asset_id()
     # get current inmet stations names from TB
-    # current_stations_in_tb = get_tb_inmet_current_stations(cfg_params)
-    current_stations_in_tb = []
+    current_stations_in_tb = get_all_entities_from_type('DEVICE')
     # verify whether a new station exists
     new_stations = []
     for station in stations_metadata:
@@ -298,11 +346,12 @@ def main():
     # create new stations at TB
     for station in new_stations:
         attributes = ast.literal_eval(json.dumps(station, ensure_ascii=False))
-        device_id = create_station(station['stationCode'])
-        access_token = get_station_access_token(device_id)
-        set_station_attributes(access_token, attributes)
-        set_relation(get_asset_id(station['stationState']), swagger_client.EntityId('DEVICE', id=device_id))
-
+        device_id = create_entity(name=station['stationCode'], entity_type='DEVICE', type='STATION')
+        set_station_attributes(device_id, attributes)
+        create_relation(from_id=get_asset_id(station['stationState']), from_type='ASSET', to_id=device_id, to_type='DEVICE')
+    
+    # delete_all_entities_from_type('ASSET')
+    # delete_all_entities_from_type('DEVICE')
 
 if __name__ == '__main__':
     main()
