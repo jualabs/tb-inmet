@@ -263,7 +263,7 @@ def get_inmet_root_asset_id():
                              'SOUTH':['PR', 'RS', 'SC'],
                              'SOUTHEAST':['ES', 'MG', 'RJ', 'SP'],
                              'MIDWEST':['DF', 'GO', 'MT', 'MS'],
-                             'SPECIALS':[]}
+                             'SPECIAL':[]}
         # create INMET root asset
         root_asset_id = create_entity(name='INMET', entity_type='ASSET', type='INSTITUTION')
         # create REGION and STATES and relations to their REGIONS and INMET
@@ -284,6 +284,7 @@ def get_station_access_token(device_id):
         rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.get(url, headers=get_new_token())
+        
         result_json = json.loads(result.content)
         credentials = result_json['credentialsId']
     except  ConnectionError:
@@ -320,9 +321,7 @@ def set_station_attributes(device_token, attributes):
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.post(url, json=attributes, headers=get_new_token())
     except  ConnectionError:
-        print('connection problem on: set_station_attributes()')   
-    
-    result_json = json.loads(result.content)
+        print('connection problem on: set_station_attributes()')
 
 def get_asset_id(asset_name):
     asset_id = ''
@@ -333,14 +332,11 @@ def get_asset_id(asset_name):
         rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.get(url, headers=get_new_token())
-        result_json = json.loads(result.content)
-        asset_id = result_json['id']['id']
+        if (result.status_code == 200): 
+            result_json = json.loads(result.content)
+            asset_id = result_json['id']['id']
     except  ConnectionError:
-        print('connection problem on: get_asset_id()')   
-    except KeyError:
-        asset_id = create_entity(name=asset_name, entity_type='ASSET', type='STATE')
-        create_relation(get_asset_id('SPECIALS'), from_type='ASSET', to_id=asset_id, to_type='ASSET')
-        pass
+        print('connection problem on: get_asset_id()')
     
     return asset_id
 
@@ -365,7 +361,16 @@ def main():
         device_id = create_entity(name=station['stationCode'], entity_type='DEVICE', type='STATION')
         device_token = get_station_access_token(device_id)
         set_station_attributes(device_token, attributes)
-        create_relation(from_id=get_asset_id(station['stationState']), from_type='ASSET', to_id=device_id, to_type='DEVICE')
+        # get the id from the parent region asset
+        parent_asset_id = get_asset_id(station['stationState'])
+        # if the region does not exist
+        if not parent_asset_id:
+            # create the asset for a special state
+            parent_asset_id = create_entity(name=station['stationState'], entity_type='ASSET', type='STATE')
+            # create a relation between a SPECIAL region and the state
+            create_relation(get_asset_id('SPECIAL'), from_type='ASSET', to_id=parent_asset_id, to_type='ASSET')
+        # create a relation between a SPECIAL region and the statethe state and the device
+        create_relation(from_id=parent_asset_id, from_type='ASSET', to_id=device_id, to_type='DEVICE')
     
     # delete_all_entities_from_type('ASSET')
     # delete_all_entities_from_type('DEVICE')
