@@ -1,6 +1,6 @@
 tb_api_access:
     # host: app.deinfo.ufrpe.br
-    host: localhost:9090
+    host: app.deinfo.ufrpe.br:8080
     user: victor@jualabs.com
     passwd: victor
 tb_entities_access:
