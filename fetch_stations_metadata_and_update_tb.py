@@ -15,19 +15,11 @@ TB_HOST = cfg_params['tb_api_access']['host']
 token = ''
 refresh_token = ''
 
-def process_rest_result(result):
+def rest_result_handler(result):
     # verify if it is a authentication error
-    if (result.status_code == 401):
-        # verify if it is an expired token error
-        if(result.errorCode == 11):
-            get_new_token()
-        if(result.errorCode == 10):
-            print('unauthorized')
-    elif (result.status_code == 204):
-        print('no content')
-    elif (result.status_code == 403):
-        print('forbidden')
-    
+    if (result.status_code != 200):
+        content = json.loads(result.content)
+        print (str(content['status']) + ' : ' + content['message'])
 
 def get_token():
     token_header = {}
@@ -55,6 +47,7 @@ def get_new_token():
     json_body['refreshToken'] = refresh_token
     try:
         result = requests.post(url, headers=headers, json=json_body)
+        rest_result_handler(result)
     except ConnectionError:
         print('connection problem on: get_new_token()')
     
@@ -83,6 +76,7 @@ def login():
     
     try:
         result = requests.post(url, headers=headers, json=json_body)
+        rest_result_handler(result)
     except ConnectionError:
         print('connection problem on: login()')
     
@@ -168,6 +162,7 @@ def create_entity(name, entity_type='DEVICE', type='AUTOMATIC-STATION'):
 
     try:
         result = requests.post(url, json=json_body, headers=get_token())
+        rest_result_handler(result)
         # verify if it is an expired token error
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.post(url, json=json_body, headers=get_new_token())
@@ -193,6 +188,7 @@ def create_relation(from_id, from_type, to_id, to_type, relation_type='Contains'
 
     try:
         result = requests.post(url, json=json_body, headers=get_token())
+        rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.post(url, json=json_body, headers=get_new_token())
     except ConnectionError:
@@ -214,6 +210,7 @@ def get_all_entities_from_type(entity_type):
     
     try:
         result = requests.get(url, headers=get_token())
+        rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.get(url, headers=get_new_token())
     except  ConnectionError:
@@ -243,6 +240,7 @@ def delete_entity(entity_id, entity_type='DEVICE'):
     
     try:
         result = requests.delete(url, headers=get_token())
+        rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.delete(url, headers=get_new_token())
     except ConnectionError:
@@ -265,7 +263,7 @@ def get_inmet_root_asset_id():
                              'SOUTH':['PR', 'RS', 'SC'],
                              'SOUTHEAST':['ES', 'MG', 'RJ', 'SP'],
                              'MIDWEST':['DF', 'GO', 'MT', 'MS'],
-                             'SPECIALS':[]}
+                             'SPECIAL':[]}
         # create INMET root asset
         root_asset_id = create_entity(name='INMET', entity_type='ASSET', type='INSTITUTION')
         # create REGION and STATES and relations to their REGIONS and INMET
@@ -283,8 +281,10 @@ def get_station_access_token(device_id):
     credentials = ''
     try:
         result = requests.get(url, headers=get_token())
+        rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.get(url, headers=get_new_token())
+        
         result_json = json.loads(result.content)
         credentials = result_json['credentialsId']
     except  ConnectionError:
@@ -294,20 +294,34 @@ def get_station_access_token(device_id):
     
     return credentials
 
-def set_station_attributes(device_id, attributes):
+# def set_station_attributes(device_id, attributes):
+#     # TODO: corrigir o scope to use the new API
+#     url = 'http://' + TB_HOST + '/api/plugins/telemetry/DEVICE/' + device_id + '/attributes/CLIENT_SCOPE'
+    
+#     result = ''
+
+#     try:
+#         result = requests.post(url, json=attributes, headers=get_token())
+#         if (result.status_code == 401 and result.errorCode == 11):
+#             result = requests.post(url, json=attributes, headers=get_new_token())
+#     except  ConnectionError:
+#         print('connection problem on: set_station_attributes()')   
+    
+#     result_json = json.loads(result.content)
+
+def set_station_attributes(device_token, attributes):
     # TODO: corrigir o scope
-    url = 'http://' + TB_HOST + '/api/plugins/telemetry/DEVICE/' + device_id + '/attributes/CLIENT_SCOPE'
+    url = 'http://' + TB_HOST + '/api/v1/' + device_token + '/attributes'
     
     result = ''
 
     try:
         result = requests.post(url, json=attributes, headers=get_token())
+        rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.post(url, json=attributes, headers=get_new_token())
     except  ConnectionError:
-        print('connection problem on: set_station_attributes()')   
-    
-    result_json = json.loads(result.content)
+        print('connection problem on: set_station_attributes()')
 
 def get_asset_id(asset_name):
     asset_id = ''
@@ -315,16 +329,14 @@ def get_asset_id(asset_name):
     
     try:
         result = requests.get(url, headers=get_token())
+        rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.get(url, headers=get_new_token())
-        result_json = json.loads(result.content)
-        asset_id = result_json['id']['id']
+        if (result.status_code == 200): 
+            result_json = json.loads(result.content)
+            asset_id = result_json['id']['id']
     except  ConnectionError:
-        print('connection problem on: get_asset_id()')   
-    except KeyError:
-        asset_id = create_entity(name=asset_name, entity_type='ASSET', type='STATE')
-        create_relation(get_asset_id('SPECIALS'), from_type='ASSET', to_id=asset_id, to_type='ASSET')
-        pass
+        print('connection problem on: get_asset_id()')
     
     return asset_id
 
@@ -347,8 +359,18 @@ def main():
     for station in new_stations:
         attributes = ast.literal_eval(json.dumps(station, ensure_ascii=False))
         device_id = create_entity(name=station['stationCode'], entity_type='DEVICE', type='STATION')
-        set_station_attributes(device_id, attributes)
-        create_relation(from_id=get_asset_id(station['stationState']), from_type='ASSET', to_id=device_id, to_type='DEVICE')
+        device_token = get_station_access_token(device_id)
+        set_station_attributes(device_token, attributes)
+        # get the id from the parent region asset
+        parent_asset_id = get_asset_id(station['stationState'])
+        # if the region does not exist
+        if not parent_asset_id:
+            # create the asset for a special state
+            parent_asset_id = create_entity(name=station['stationState'], entity_type='ASSET', type='STATE')
+            # create a relation between a SPECIAL region and the state
+            create_relation(get_asset_id('SPECIAL'), from_type='ASSET', to_id=parent_asset_id, to_type='ASSET')
+        # create a relation between a SPECIAL region and the statethe state and the device
+        create_relation(from_id=parent_asset_id, from_type='ASSET', to_id=device_id, to_type='DEVICE')
     
     # delete_all_entities_from_type('ASSET')
     # delete_all_entities_from_type('DEVICE')
