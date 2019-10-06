@@ -257,7 +257,7 @@ def delete_all_entities_from_type(entity_type='DEVICE'):
 def get_inmet_root_asset_id():
     root_asset_id = get_asset_id('INMET')
     # if there is no root INMET asset, create it, regions, states and relations
-    if root_asset_id == '':
+    if not root_asset_id:
         states_on_regions = {'NORTH':['AC', 'AP', 'AM', 'PA', 'RO', 'RR', 'TO'],
                              'NORTHEAST':['AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'],
                              'SOUTH':['PR', 'RS', 'SC'],
@@ -294,34 +294,18 @@ def get_station_access_token(device_id):
     
     return credentials
 
-# def set_station_attributes(device_id, attributes):
-#     # TODO: corrigir o scope to use the new API
-#     url = 'http://' + TB_HOST + '/api/plugins/telemetry/DEVICE/' + device_id + '/attributes/CLIENT_SCOPE'
-    
-#     result = ''
-
-#     try:
-#         result = requests.post(url, json=attributes, headers=get_token())
-#         if (result.status_code == 401 and result.errorCode == 11):
-#             result = requests.post(url, json=attributes, headers=get_new_token())
-#     except  ConnectionError:
-#         print('connection problem on: set_station_attributes()')   
-    
-#     result_json = json.loads(result.content)
-
-def set_station_attributes(device_token, attributes):
-    # TODO: corrigir o scope
-    url = 'http://' + TB_HOST + '/api/v1/' + device_token + '/attributes'
+def set_station_attributes(device_id, attributes):
+    # TODO: corrigir o scope to use the new API
+    url = 'http://' + TB_HOST + '/api/plugins/telemetry/' + device_id + '/SHARED_SCOPE'
     
     result = ''
 
     try:
         result = requests.post(url, json=attributes, headers=get_token())
-        rest_result_handler(result)
         if (result.status_code == 401 and result.errorCode == 11):
             result = requests.post(url, json=attributes, headers=get_new_token())
     except  ConnectionError:
-        print('connection problem on: set_station_attributes()')
+        print('connection problem on: set_station_attributes()')   
 
 def get_asset_id(asset_name):
     asset_id = ''
@@ -349,18 +333,20 @@ def main():
     get_inmet_root_asset_id()
     # get current inmet stations names from TB
     current_stations_in_tb = get_all_entities_from_type('DEVICE')
+    current_stations_in_tb_names = []
+    for station_in_tb in current_stations_in_tb:
+        current_stations_in_tb_names.append(station_in_tb['name'])
     # verify whether a new station exists
     new_stations = []
     for station in stations_metadata:
         # if there is a new station loads its metadata in TB
-        if station['stationCode'] not in current_stations_in_tb:
+        if station['stationCode'] not in current_stations_in_tb_names:
             new_stations.append(station)
     # create new stations at TB
     for station in new_stations:
         attributes = ast.literal_eval(json.dumps(station, ensure_ascii=False))
         device_id = create_entity(name=station['stationCode'], entity_type='DEVICE', type='STATION')
-        device_token = get_station_access_token(device_id)
-        set_station_attributes(device_token, attributes)
+        set_station_attributes(device_id, attributes)
         # get the id from the parent region asset
         parent_asset_id = get_asset_id(station['stationState'])
         # if the region does not exist
